@@ -21,6 +21,9 @@ def rotate_image(img):
 
 def resize_pixel(img, width_pixel):
     img_pixel = img.size
+    if img_pixel[0] <= width_pixel:
+        return img
+    
     height_pixel = int(width_pixel / img_pixel[0] * img_pixel[1])
     return img.resize((width_pixel, height_pixel))
 

@@ -1,6 +1,6 @@
 PYTHON = python
 
-SCRIPT = img_resizer.py
+SCRIPT = jpg_resizer.py
 
 IMG_DIR = ./images
 
