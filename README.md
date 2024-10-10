@@ -7,7 +7,7 @@
 ```sh
 make
 make default
-make run kb={target image size per kb} max_width={max image width pixel} max_heught={max image height pixel}"
+make run kb={target image size per kb} max_width={max image width pixel} max_height={max image height pixel}"
 make help
 make clean
 ```

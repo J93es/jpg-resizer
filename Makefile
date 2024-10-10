@@ -12,13 +12,13 @@ default: $(SCRIPT)
 	$(PYTHON) $(SCRIPT) 50 900 900
 
 run: $(SCRIPT)
-	$(PYTHON) $(SCRIPT) $(kb) $(w_pixel)
+	$(PYTHON) $(SCRIPT) $(kb) $(max_width) $(max_height)
 
 help:
 	@echo "사용법:"
 	@echo "    make"
 	@echo "    make default"
-	@echo "    make run kb={target image size per kb} max_width={max image width pixel} max_heught={max image height pixel}"
+	@echo "    make run kb={target image size per kb} max_width={max image width pixel} max_height={max image height pixel}"
 	@echo "    make clean"
 
 clean:
