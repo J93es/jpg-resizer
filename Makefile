@@ -9,7 +9,7 @@ IMG_DIR = ./images
 all: default
 
 default: $(SCRIPT)
-	$(PYTHON) $(SCRIPT) 50 900 900
+	$(PYTHON) $(SCRIPT) 200 1200 1200
 
 run: $(SCRIPT)
 	$(PYTHON) $(SCRIPT) $(kb) $(max_width) $(max_height)
