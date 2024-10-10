@@ -19,19 +19,24 @@ def rotate_image(img):
                     return img.rotate(90, expand=True)
     return img
 
-def resize_pixel(img, width_pixel):
-    img_pixel = img.size
-    if img_pixel[0] <= width_pixel:
+def resize_pixel(img, max_width_pixel, max_height_pixel):
+    img_width, img_height = img.size
+    if img_width <= max_width_pixel and img_height <= max_height_pixel:
         return img
     
-    height_pixel = int(width_pixel / img_pixel[0] * img_pixel[1])
-    return img.resize((width_pixel, height_pixel))
+    width_ratio = max_width_pixel / img_width
+    height_ratio = max_height_pixel / img_height
+    
+    if width_ratio < height_ratio:
+        return img.resize((max_width_pixel, int(img_height * width_ratio)))
+    
+    return img.resize((int(img_width * height_ratio), max_height_pixel))
 
-def resize_quality(img, tmp_dir, max_size_bytes):
+def find_quality(img, tmp_dir, max_size_bytes):
     os.makedirs(tmp_dir, exist_ok=True)
     tmp_path = os.path.join(tmp_dir, "tmp.jpg")
     
-    low, high = 50, 100
+    low, high = 70, 100
     final_quality = high
 
     while low <= high:
@@ -48,7 +53,7 @@ def resize_quality(img, tmp_dir, max_size_bytes):
             
     return final_quality
     
-def resize_and_save_images(input_dir, output_dir, tmp_dir, max_size_kb, width_pixel):
+def resize_and_save_images(input_dir, output_dir, tmp_dir, max_size_kb, max_width_pixel, max_height_pixel):
     max_size_bytes = max_size_kb * 1024
     os.makedirs(input_dir, exist_ok=True)
     os.makedirs(output_dir, exist_ok=True)
@@ -60,16 +65,16 @@ def resize_and_save_images(input_dir, output_dir, tmp_dir, max_size_kb, width_pi
 
             img = Image.open(input_path)
             img = rotate_image(img)
-            img = resize_pixel(img, width_pixel)
-            final_quality = resize_quality(img, tmp_dir, max_size_bytes)
+            img = resize_pixel(img, max_width_pixel, max_height_pixel)
+            final_quality = find_quality(img, tmp_dir, max_size_bytes)
 
             img.save(output_path, "JPEG", quality=final_quality)
             print(f"{filename} resized and saved with final quality {final_quality}")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: python file.py <max_size_kb> <width-pixel>")
+    if len(sys.argv) != 4:
+        print("Usage: python file.py <max_size_kb> <max-width-pixel> <max-height-pixel>")
         sys.exit(1)
         
     current_file_path = os.path.abspath(sys.argv[0])
@@ -80,6 +85,7 @@ if __name__ == "__main__":
     tmp_directory = os.path.join(current_directory, "tmp")
     
     max_size_kb = int(sys.argv[1])
-    width_pixel = int(sys.argv[2])
+    max_width_pixel = int(sys.argv[2])
+    max_height_pixel = int(sys.argv[3])
         
-    resize_and_save_images(input_directory, output_directory, tmp_directory, max_size_kb, width_pixel)
+    resize_and_save_images(input_directory, output_directory, tmp_directory, max_size_kb, max_width_pixel, max_height_pixel)
