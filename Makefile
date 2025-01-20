@@ -24,6 +24,6 @@ help:
 clean:
 	rm -f *.pyc
 	rm -f ./images/*
+	touch ./images/.gitkeep
 	rm -rf ./resized_images
-	rm -rf ./tmp
 	mkdir -p $(IMG_DIR)

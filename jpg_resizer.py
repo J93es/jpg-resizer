@@ -2,6 +2,8 @@ import os
 import sys
 from PIL import Image, ExifTags
 
+tmp_file_name = "tmp.jpg"
+
 def rotate_image(img):
     if hasattr(img, '_getexif'):
         exif = img._getexif()
@@ -34,7 +36,7 @@ def resize_pixel(img, max_width_pixel, max_height_pixel):
 
 def find_quality(img, tmp_dir, max_size_bytes):
     os.makedirs(tmp_dir, exist_ok=True)
-    tmp_path = os.path.join(tmp_dir, "tmp.jpg")
+    tmp_path = os.path.join(tmp_dir, tmp_file_name)
     
     low, high = 70, 100
     final_quality = high
@@ -70,6 +72,10 @@ def resize_and_save_images(input_dir, output_dir, tmp_dir, max_size_kb, max_widt
 
             img.save(output_path, "JPEG", quality=final_quality)
             print(f"{filename} resized and saved with final quality {final_quality}")
+           
+    tmp_file_path = os.path.join(tmp_dir, tmp_file_name)
+    os.remove(tmp_file_path)
+    os.rmdir(tmp_dir)
 
 
 if __name__ == "__main__":

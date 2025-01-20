@@ -4,6 +4,10 @@
 
 ## Use
 
+### 1. images 폴더에 리사이징을 원하는 .jpg 파일을 복사한다.
+
+### 2. 아래 스크립트를 통하여 코드를 실행한다.
+
 ```sh
 make
 make default
@@ -11,3 +15,5 @@ make run kb={target image size per kb} max_width={max image width pixel} max_hei
 make help
 make clean
 ```
+
+### 3. 생성된 ./resized_images/ 폴더 안에 결과물이 생성된다.
