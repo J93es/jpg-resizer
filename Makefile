@@ -1,9 +1,6 @@
 PYTHON = python
-
 SCRIPT = jpg_resizer.py
-
 IMG_DIR = ./images
-
 YEAR = $(shell date +%Y)
 
 .PHONY: all default run help clean

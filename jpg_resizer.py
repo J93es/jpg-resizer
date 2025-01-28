@@ -97,8 +97,7 @@ def add_watermark(img, watermark_text):
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:
-        print("Usage: python file.py <max_size_kb> <max-width-pixel> <max-height-pixel> <watermark_text(optional)>")
-        print("Usage: make run kb={target image size per kb} max_width={max image width pixel} max_height={max image height pixel}")
+        print("Usage: make run kb={target image size (kb)} max_width={max image width(pixel)} max_height={max image height(pixel)} watermark_text={watermark text(optional)}")
         sys.exit(1)
         
     current_file_path = os.path.abspath(sys.argv[0])

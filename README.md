@@ -11,7 +11,7 @@
 ```sh
 make
 make default
-make run kb={target image size per kb} max_width={max image width pixel} max_height={max image height pixel}
+make run kb={target image size (kb)} max_width={max image width(pixel)} max_height={max image height(pixel) watermark_text={watermark text(optional)}}
 make help
 make clean
 ```
