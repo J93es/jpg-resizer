@@ -56,8 +56,6 @@ def find_quality(img, tmp_dir, max_size_bytes):
     return final_quality
 
 def add_watermark(img, watermark_text):
-    
-    scale_factor = 0.1
     img = img.convert("RGBA")
     
    # 워터마크 레이어 생성
@@ -77,8 +75,19 @@ def add_watermark(img, watermark_text):
     x = (img.width - text_width) - 10
     y = (img.height - text_height) - 10
 
+        # 워터마크 위치 주변의 평균 밝기 계산
+    region = img.crop((x, y, x + text_width, y + text_height))
+    region_gray = region.convert("L")  # Grayscale 변환
+    avg_brightness = sum(region_gray.getdata()) / (text_width * text_height)
+
+    # 밝기에 따라 워터마크 색상 결정 (밝으면 어두운 색, 어두우면 밝은 색)
+    if avg_brightness > 128:  # 밝기 임계값
+        watermark_color = (0, 0, 0, 128)  # 어두운 색
+    else:
+        watermark_color = (255, 255, 255, 128)  # 밝은 색
+
     # 워터마크 텍스트 추가
-    draw.text((x, y), watermark_text, fill=(255, 255, 255, 128), font=font)
+    draw.text((x, y), watermark_text, fill=watermark_color, font=font)
 
     # 원본 이미지와 병합
     watermarked_image = Image.alpha_composite(img, watermark_layer)
