@@ -1,6 +1,7 @@
 import os
 import sys
 from PIL import Image, ExifTags, ImageDraw, ImageFont
+from fractions import Fraction
 
 tmp_file_name = "tmp.jpg"
 
@@ -73,14 +74,8 @@ def get_metadata_str(img):
         tag = ExifTags.TAGS.get(tag_id, tag_id)
         exif[tag] = value
     
-    # 카메라 바디: 제조사(Make)와 모델(Model)을 함께 사용
-    camera_body = ""
-    if "Make" in exif and "Model" in exif:
-        camera_body = f"{exif['Make']} {exif['Model']}"
-    elif "Model" in exif:
-        camera_body = exif["Model"]
-    elif "Make" in exif:
-        camera_body = exif["Make"]
+    # 카메라 바디: Model (존재할 경우)
+    camera_body = lens = exif.get("Model", "")
     
     # 카메라 렌즈: LensModel (존재할 경우)
     lens = exif.get("LensModel", "")
@@ -105,10 +100,19 @@ def get_metadata_str(img):
     # 셔터스피드: ExposureTime
     shutter = exif.get("ExposureTime", None)
     if shutter is not None:
-        if isinstance(shutter, tuple) and shutter[1] != 0:
-            shutter = f"{shutter[0]}/{shutter[1]} sec"
-        else:
-            shutter = f"{shutter} sec"
+        try:
+            # tuple 형태이면 그대로 Fraction으로 변환, 아니면 float로 변환 후 Fraction 적용
+            if isinstance(shutter, tuple) and shutter[1] != 0:
+                shutter_fraction = Fraction(shutter[0], shutter[1])
+            else:
+                shutter_fraction = Fraction(shutter).limit_denominator(100000)
+            shutter = f"{shutter_fraction.numerator}/{shutter_fraction.denominator}sec"
+        except Exception:
+            try:
+                shutter_float = float(shutter)
+                shutter = f"{shutter_float:.5f}sec"
+            except Exception:
+                shutter = f"{shutter}"[:7] if len(f"{shutter}") > 7 else f"{shutter}" + "sec"
     
     # ISO: ISOSpeedRatings
     iso = exif.get("ISOSpeedRatings", "")
@@ -116,6 +120,7 @@ def get_metadata_str(img):
         iso = iso[0]
     
     meta_lines = []
+    
     if camera_body:
         meta_lines.append(f"{camera_body}")
     if lens:
@@ -130,7 +135,6 @@ def get_metadata_str(img):
         exposure_values.append(f"{shutter}")
     if iso:
         exposure_values.append(f"ISO{iso}")
-        
     if exposure_values:
         exposure_str = "  ".join(exposure_values)
         meta_lines.append(exposure_str)
@@ -228,9 +232,15 @@ def add_watermark(img, watermark_text, meta_str):
         watermark_color = (255, 255, 255, 160)  # 밝은 색 (배경이 어두울 때)
     
     # 각 줄을 순차적으로 그리기
+     # 각 줄을 순차적으로 그리기 (오른쪽 정렬)
     current_y = y
     for i, line in enumerate(lines):
-        draw.text((x, current_y), line, fill=watermark_color, font=font)
+        # 각 줄의 폭 측정
+        bbox = draw.textbbox((0, 0), line, font=font)
+        line_width = bbox[2] - bbox[0]
+        # 오른쪽 정렬: 각 줄의 x 좌표는 이미지의 오른쪽 여백 10픽셀을 고려하여 계산
+        line_x = img.width - line_width - 10
+        draw.text((line_x, current_y), line, fill=watermark_color, font=font)
         current_y += line_heights[i] + spacing
 
     # 워터마크 레이어와 원본 이미지 합성
@@ -259,7 +269,7 @@ if __name__ == "__main__":
         use_meta_watermark = True
     else:
         use_meta_watermark = False
-    watermark_text = sys.argv[5] if len(sys.argv) >= 6 else ""
+    watermark_text = sys.argv[5] if len(sys.argv) >= 6 else None
         
     max_size_bytes = max_size_kb * 1024
     os.makedirs(input_dir, exist_ok=True)
@@ -274,7 +284,7 @@ if __name__ == "__main__":
             if use_meta_watermark:
                 meta_str = get_metadata_str(img)
             else:
-                meta_str = ""
+                meta_str = None
             img = rotate_image(img)
             img = resize_pixel(img, max_width_pixel, max_height_pixel)
             img = add_watermark(img, watermark_text, meta_str)
